@@ -1,0 +1,14 @@
+{
+  "name": "neto-warning",
+  "version": "1.0.0",
+  "description": "Customer warning website",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'This is a static HTML site - open index.html in a browser'",
+    "build": "echo 'No build step needed for static site'"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  },
+  "devDependencies": {}
+}
