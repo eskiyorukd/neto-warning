@@ -143,19 +143,6 @@
   .cor h2{margin-bottom:8px}
   .cor p{color:#544c40;font-size:16px;max-width:50ch;margin:0 auto 24px}
 
-  .cbox{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 18px 40px -30px rgba(0,0,0,.4)}
-  .cbox input,.cbox textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:var(--body);font-size:15px;color:var(--ink);background:var(--surface-2);margin-bottom:12px;resize:vertical}
-  .cbox input:focus,.cbox textarea:focus{outline:none;border-color:var(--amber)}
-  .crow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-  .cnote{font-size:12.5px;color:var(--muted)}
-  .clist{margin-top:22px;display:grid;gap:12px}
-  .cempty{color:var(--muted);font-size:15px;text-align:center;padding:26px;border:1px dashed var(--line);border-radius:14px}
-  .comment{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-  .comment .ch{display:flex;align-items:center;gap:9px;margin-bottom:6px}
-  .comment .cn{font-weight:800;font-size:15px}
-  .comment .cp{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--amber);border:1px solid var(--amber);border-radius:999px;padding:2px 9px}
-  .comment .ct{font-size:15px;color:#3a352d;white-space:pre-wrap;line-height:1.55}
-
   .share{display:flex;gap:11px;flex-wrap:wrap;margin-top:24px}
   .share button{flex:1;min-width:130px;text-align:center;border:1.5px solid var(--ink);border-radius:999px;padding:13px;font-weight:700;font-size:14.5px;transition:background .15s,color .15s,transform .15s;background:var(--surface);color:var(--ink);cursor:pointer;font-family:var(--body)}
   .share button:hover{background:var(--ink);color:var(--paper);transform:translateY(-2px)}
@@ -295,28 +282,6 @@
     </div>
   </section>
 
-  <!-- COMMENTS -->
-  <section class="blk" id="comments">
-    <div class="wrap">
-      <div class="kicker reveal">You&rsquo;re not alone</div>
-      <h2 class="reveal">Have you dealt with Neto Flooring too?</h2>
-      <p class="body reveal">If you&rsquo;ve had a similar experience with this contractor in the Atlanta area, share it below. Comments are reviewed before they appear.</p>
-
-      <div class="cbox reveal">
-        <input id="cname" type="text" maxlength="60" placeholder="Your name (optional)" />
-        <textarea id="ctext" rows="4" maxlength="1500" placeholder="Share your experience&hellip;"></textarea>
-        <div class="crow">
-          <span class="cnote">&#128274; Reviewed before posting</span>
-          <button class="btn" onclick="addComment()">Post comment</button>
-        </div>
-      </div>
-
-      <div id="clist" class="clist reveal">
-        <div class="cempty" id="cempty">No comments yet — be the first to share your experience.</div>
-      </div>
-    </div>
-  </section>
-
   <!-- SHARE -->
   <section class="blk">
     <div class="wrap">
@@ -351,35 +316,12 @@
     function shareTwitter(){window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent(SHARE_TEXT)+"&url="+encodeURIComponent(SHARE_URL),"_blank","noopener");}
     function shareNextdoor(){try{if(navigator.share){navigator.share({title:"Neto Flooring warning",text:SHARE_TEXT,url:SHARE_URL});return;}}catch(e){}window.open("https://nextdoor.com/","_blank","noopener");}
     function copyLink(btn){var done=function(){var t=btn.textContent;btn.textContent="Copied!";setTimeout(function(){btn.textContent=t;},1600);};try{navigator.clipboard.writeText(SHARE_URL).then(done,done);}catch(e){done();}}
-    function fmtDate(ts){try{return new Date(ts).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}catch(e){return'';}}
-    function renderComments(items){
-      var list=document.getElementById('clist'); list.innerHTML='';
-      if(!items||!items.length){list.innerHTML='<div class="cempty" id="cempty">No comments yet — be the first to share your experience.</div>';return;}
-      items.forEach(function(c){
-        var el=document.createElement('div'); el.className='comment';
-        var head=document.createElement('div'); head.className='ch';
-        var nm=document.createElement('span'); nm.className='cn'; nm.textContent=c.name||'Anonymous'; head.appendChild(nm);
-        if(c.created_at){var dt=document.createElement('span'); dt.className='cnote'; dt.textContent=fmtDate(c.created_at); head.appendChild(dt);}
-        var body=document.createElement('div'); body.className='ct'; body.textContent=c.body||'';
-        el.appendChild(head); el.appendChild(body); list.appendChild(el);
-      });
-    }
-    function loadComments(){fetch('/api/comments').then(function(r){return r.json();}).then(renderComments).catch(function(){});}
-    function addComment(){
-      var n=document.getElementById('cname'),t=document.getElementById('ctext');
-      var text=(t.value||'').trim(); if(!text)return;
-      fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n.value,body:text})})
-        .then(function(r){return r.json();})
-        .then(function(){document.querySelector('.cbox').innerHTML='<p style="margin:0;color:#3a352d;font-size:15.5px">&#10003; Thank you — your comment has been submitted and will appear once it&rsquo;s reviewed.</p>';})
-        .catch(function(){alert('Sorry, something went wrong. Please try again.');});
-    }
 
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
     document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
     var hero=document.querySelector('.hero'),bar=document.getElementById('topbar');
     var ho=new IntersectionObserver(function(es){es.forEach(function(e){bar.classList.toggle('show',!e.isIntersecting);});},{threshold:0});
     ho.observe(hero);
-    loadComments();
   </script>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
