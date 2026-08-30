@@ -364,14 +364,34 @@
         el.appendChild(head); el.appendChild(body); list.appendChild(el);
       });
     }
-    function loadComments(){fetch('/api/comments').then(function(r){return r.json();}).then(renderComments).catch(function(){});}
+    function closeComments(){
+      var box=document.querySelector('.cbox');
+      if(box) box.style.display='none';
+      var list=document.getElementById('clist');
+      if(list) list.innerHTML='<div class="cempty" id="cempty">Comments are temporarily closed.</div>';
+    }
+    function loadComments(){
+      fetch('/api/comments').then(function(r){
+        if(!r.ok) throw new Error('Comments API unavailable');
+        return r.json();
+      }).then(function(data){
+        if(!Array.isArray(data)) throw new Error('Comments API unavailable');
+        renderComments(data);
+      }).catch(function(){ closeComments(); });
+    }
     function addComment(){
       var n=document.getElementById('cname'),t=document.getElementById('ctext');
       var text=(t.value||'').trim(); if(!text)return;
       fetch('/api/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n.value,body:text})})
-        .then(function(r){return r.json();})
+        .then(function(r){
+          if(!r.ok) throw r;
+          return r.json();
+        })
         .then(function(){document.querySelector('.cbox').innerHTML='<p style="margin:0;color:#3a352d;font-size:15.5px">&#10003; Thank you — your comment has been submitted and will appear once it&rsquo;s reviewed.</p>';})
-        .catch(function(){alert('Sorry, something went wrong. Please try again.');});
+        .catch(function(err){
+          if(err && err.status===503){ closeComments(); return; }
+          alert('Sorry, something went wrong. Please try again.');
+        });
     }
 
     var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
